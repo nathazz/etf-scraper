@@ -38,6 +38,7 @@ func SaveToPDF(etfs []model.EtfInfo) ([]byte, error) {
 
 	var buf bytes.Buffer
 	err := pdf.Output(&buf)
+
 	if err != nil {
 		return nil, err
 	}

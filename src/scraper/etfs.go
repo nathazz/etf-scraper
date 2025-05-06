@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-func EtfScraper() []model.EtfInfo {
-	isins := []string{"LU1737652310", "LU0274210672", `IE00B14X4M10`}
+func EtfScraper(isins []string) []model.EtfInfo {
+
 	etfInfo := model.EtfInfo{}
 	etfInfos := make([]model.EtfInfo, 0, len(isins))
 
@@ -47,13 +47,6 @@ func EtfScraper() []model.EtfInfo {
 
 	c.OnScraped(func(r *colly.Response) {
 		etfInfos = append(etfInfos, etfInfo)
-
-		//err := utils.SaveToPDF(etfInfos, "etfinfo.pdf")
-
-		//if err != nil {
-		//	return
-		//}
-
 		etfInfo = model.EtfInfo{}
 	})
 
