@@ -8,9 +8,9 @@ import (
 func main() {
 
 	r := gin.Default()
-	err := r.Run(":8080")
-
 	routes.SetupRouter(r)
+
+	err := r.Run(":8080")
 
 	if err != nil {
 		return

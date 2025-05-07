@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"scraper-go/src/scraper"
 	"scraper-go/src/utils"
@@ -13,11 +14,20 @@ type EtfRequest struct {
 	Isins []string `json:"isins"`
 }
 
+func Health(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
 func GetEtf(c *gin.Context) {
 	isin := c.Param("isin")
 
 	if isin == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ISIN required"})
+		utils.RespondError(c, http.StatusBadRequest, "ISIN is required")
+		return
+	}
+
+	if !utils.IsValidISIN(isin) {
+		utils.RespondError(c, http.StatusBadRequest, "Invalid ISIN format")
 		return
 	}
 
@@ -29,13 +39,25 @@ func GetMoreEtfs(c *gin.Context) {
 	var req EtfRequest
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "Invalid input"})
+		utils.RespondError(c, http.StatusBadRequest, "Invalid input. Expected JSON with 'isins' array")
+		return
+	}
+
+	if len(req.Isins) == 0 {
+		utils.RespondError(c, http.StatusBadRequest, "At least one ISIN is required")
 		return
 	}
 
 	if len(req.Isins) > 10 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "You can only request up to 10 ISINs"})
+		utils.RespondError(c, http.StatusBadRequest, "You can only request up to 10 ISINs")
 		return
+	}
+
+	for _, isin := range req.Isins {
+		if !utils.IsValidISIN(isin) {
+			utils.RespondError(c, http.StatusBadRequest, fmt.Sprintf("Invalid ISIN format: %s", isin))
+			return
+		}
 	}
 
 	results := scraper.EtfScraper(req.Isins)
@@ -46,24 +68,37 @@ func GenerateEtfsPdfs(c *gin.Context) {
 	var req EtfRequest
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		utils.RespondError(c, http.StatusBadRequest, "Invalid input. Expected JSON with 'isins' array")
+		return
+	}
+
+	if len(req.Isins) == 0 {
+		utils.RespondError(c, http.StatusBadRequest, "At least one ISIN is required")
+		return
 	}
 
 	if len(req.Isins) > 10 {
-		c.JSON(http.StatusOK, gin.H{"error": "You can only request up to 10 ISINs"})
+		utils.RespondError(c, http.StatusBadRequest, "You can only request up to 10 ISINs")
 		return
+	}
+
+	for _, isin := range req.Isins {
+		if !utils.IsValidISIN(isin) {
+			utils.RespondError(c, http.StatusBadRequest, fmt.Sprintf("Invalid ISIN format: %s", isin))
+			return
+		}
 	}
 
 	etfs := scraper.EtfScraper(req.Isins)
 	pdfBytes, err := utils.SaveToPDF(etfs)
 
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error to create PDF")
+		log.Printf("Error generating PDF: %v", err)
+		utils.RespondError(c, http.StatusInternalServerError, "Error generating PDF")
 		return
 	}
 
 	filename := fmt.Sprintf("etf-report-%s.pdf", time.Now().Format("20060102"))
 	c.Header("Content-Disposition", "attachment; filename="+filename)
-
 	c.Data(http.StatusOK, "application/pdf", pdfBytes)
 }
