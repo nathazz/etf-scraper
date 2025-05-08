@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-
 	r := gin.Default()
 	routes.SetupRouter(r)
 

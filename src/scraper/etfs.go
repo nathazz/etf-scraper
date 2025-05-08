@@ -2,27 +2,45 @@ package scraper
 
 import (
 	"github.com/gocolly/colly"
+	"log"
 	"scraper-go/src/model"
 	"scraper-go/src/utils"
 	"strings"
 )
 
 func EtfScraper(isins []string) []model.EtfInfo {
-
-	etfInfo := model.EtfInfo{}
 	etfInfos := make([]model.EtfInfo, 0, len(isins))
 
-	c := colly.NewCollector(colly.AllowedDomains("www.trackingdifferences.com", "trackingdifferences.com"))
+	c := colly.NewCollector(
+		colly.AllowedDomains("www.trackingdifferences.com", "trackingdifferences.com"),
+		colly.Async(true),
+	)
+
+	c.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("Accept-Language", "en-US;q=0.9,en;q=0.8")
+		log.Println("Visiting:", r.URL.String())
+
+		if r.Ctx.GetAny("etfInfo") == nil {
+			r.Abort()
+		}
+	})
+
+	c.OnError(func(_ *colly.Response, err error) {
+		log.Println("Something went wrong:", err)
+	})
 
 	c.OnHTML("h1.page-title", func(e *colly.HTMLElement) {
-		etfInfo.Title = e.Text
+		info := e.Request.Ctx.GetAny("etfInfo").(*model.EtfInfo)
+		info.Title = e.Text
 	})
 
 	c.OnHTML("p.mt-2", func(e *colly.HTMLElement) {
-		etfInfo.Description = e.Text
+		info := e.Request.Ctx.GetAny("etfInfo").(*model.EtfInfo)
+		info.Description = e.Text
 	})
 
 	c.OnHTML("div.descfloat p.desc", func(e *colly.HTMLElement) {
+		info := e.Request.Ctx.GetAny("etfInfo").(*model.EtfInfo)
 		selection := e.DOM
 		nodes := selection.Children().Nodes
 
@@ -32,27 +50,40 @@ func EtfScraper(isins []string) []model.EtfInfo {
 
 			switch description {
 			case "Replication":
-				etfInfo.Replication = value
+				info.Replication = value
 			case "TER":
-				etfInfo.TotalExpenseRatio = value
+				info.TotalExpenseRatio = value
 			case "TD":
-				etfInfo.TrackingDifference = value
+				info.TrackingDifference = value
 			case "Earnings":
-				etfInfo.Earnings = value
+				info.Earnings = value
 			case "Fund size":
-				etfInfo.FundSize = value
+				info.FundSize = value
 			}
 		}
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		etfInfos = append(etfInfos, etfInfo)
-		etfInfo = model.EtfInfo{}
+		info := r.Ctx.GetAny("etfInfo").(*model.EtfInfo)
+		log.Println("etfInfos(append):", *info)
+		etfInfos = append(etfInfos, *info)
 	})
 
 	for _, isin := range isins {
-		_ = c.Visit(utils.ScrapeUrls(isin))
+		info := &model.EtfInfo{
+			Isin: isin,
+		}
+
+		ctx := colly.NewContext()
+		ctx.Put("etfInfo", info)
+
+		err := c.Request("GET", utils.ScrapeUrls(isin), nil, ctx, nil)
+		if err != nil {
+			log.Println("Failed to visit:", isin, err)
+		}
 	}
+
+	c.Wait()
 
 	return etfInfos
 }
