@@ -7,7 +7,7 @@ This API provides endpoints to:
 - ✅ Fetch individual ETF details  
 - 📦 Retrieve information on multiple ETFs  
 - 📄 Generate PDF reports  
-- 🔄 *(Coming soon)* Compare multiple ETFs
+- 🔄 Compare multiple ETFs
 
 ---
 
@@ -45,8 +45,8 @@ Fetch details for up to 10 ETFs at once.
   "isins": [
     "LU1737652310",
     "IE00B4K48X80",
-    "IE00B4K48X80",
-    "IE00B4K48X80"
+    "IE00B1YZSC51",
+    "LU0446734104"
   ]
 }
 ```
@@ -64,8 +64,8 @@ Generate a PDF report of up to 10 ETFs
   "isins": [
     "LU1737652310",
     "IE00B4K48X80",
-    "IE00B4K48X80",
-    "IE00B4K48X80"
+    "IE00B1YZSC51",
+    "LU0446734104"
   ]
 }
 ```
