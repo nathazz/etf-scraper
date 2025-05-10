@@ -8,6 +8,7 @@ import (
 func SetupRouter(r *gin.Engine) {
 	r.GET("/", controllers.Health)
 	r.GET("/etf/:isin", controllers.GetEtf)
+	r.POST("/etf/compare-etfs", controllers.CompareEtf)
 	r.POST("/etf", controllers.GetMoreEtfs)
-	r.POST("/etf/generate-pdf", controllers.GenerateEtfsPdfs)
+	r.POST("/etf/generate-pdf", controllers.EtfPdfGenerator)
 }

@@ -10,3 +10,7 @@ type EtfInfo struct {
 	FundSize           string `json:"fund_size"`
 	Description        string `json:"description"`
 }
+
+type EtfRequest struct {
+	Isins []string `json:"isins"`
+}

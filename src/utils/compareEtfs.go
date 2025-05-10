@@ -27,18 +27,19 @@ func CompareEtf(etfs []model.EtfInfo) string {
 	sort.Slice(fsRank, func(i, j int) bool { return fsRank[i].Value > fsRank[j].Value })
 
 	var sb strings.Builder
+
 	sb.WriteString("Top ETFs by Tracking Difference:\n")
-	for i, etf := range tdRank[:min(3, len(tdRank))] {
+	for i, etf := range tdRank[:minimum(3, len(tdRank))] {
 		sb.WriteString(fmt.Sprintf("%d. %s (%.2f%%)\n", i+1, etf.Title, etf.Value))
 	}
 
 	sb.WriteString("\nTop ETFs by Total Expense Ratio:\n")
-	for i, etf := range terRank[:min(3, len(terRank))] {
+	for i, etf := range terRank[:minimum(3, len(terRank))] {
 		sb.WriteString(fmt.Sprintf("%d. %s (%.2f%%)\n", i+1, etf.Title, etf.Value))
 	}
 
 	sb.WriteString("\nTop ETFs by Fund Size:\n")
-	for i, etf := range fsRank[:min(3, len(fsRank))] {
+	for i, etf := range fsRank[:minimum(3, len(fsRank))] {
 		sb.WriteString(fmt.Sprintf("%d. %s (%.2f B)\n", i+1, etf.Title, etf.Value))
 	}
 
@@ -46,26 +47,37 @@ func CompareEtf(etfs []model.EtfInfo) string {
 }
 
 func parsePercent(s string) float64 {
+	s = strings.TrimSpace(s)
 	s = strings.TrimSuffix(s, "%")
+	s = strings.TrimSpace(s)
 	s = strings.ReplaceAll(s, ",", ".")
 	v, err := strconv.ParseFloat(s, 64)
+
 	if err != nil {
+		fmt.Printf("Warning: failed to parse percent value '%s'\n", s)
 		return 0
 	}
 	return v
 }
 
 func parseFundSize(s string) float64 {
-	s = strings.ToUpper(s)
+	s = strings.ToUpper(strings.TrimSpace(s))
 	s = strings.ReplaceAll(s, ",", "")
-	if strings.HasSuffix(s, "B") {
-		val, _ := strconv.ParseFloat(strings.TrimSuffix(s, "B"), 64)
-		return val
+	s = strings.TrimSuffix(s, " EUR")
+	s = strings.TrimSuffix(s, "MIO")
+	s = strings.TrimSpace(s)
+
+	val, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		fmt.Printf("Warning: failed to parse fund size value '%s'\n", s)
+		return 0
 	}
-	if strings.HasSuffix(s, "M") {
-		val, _ := strconv.ParseFloat(strings.TrimSuffix(s, "M"), 64)
-		return val / 1000
+	return val / 1000
+}
+
+func minimum(a, b int) int {
+	if a < b {
+		return a
 	}
-	val, _ := strconv.ParseFloat(s, 64)
-	return val
+	return b
 }
