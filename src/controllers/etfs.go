@@ -53,7 +53,7 @@ func CompareEtf(c *gin.Context) {
 
 	etfs := scraper.EtfScraper(req.Isins)
 
-	results := utils.CompareEtf(etfs)
+	results := utils.CompareEtf(etfs, true)
 	c.JSON(http.StatusOK, results)
 
 }

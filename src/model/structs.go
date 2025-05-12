@@ -14,3 +14,14 @@ type EtfInfo struct {
 type EtfRequest struct {
 	Isins []string `json:"isins"`
 }
+
+type RankedEtf struct {
+	Title string  `json:"title"`
+	Value float64 `json:"value"`
+}
+
+type RankedResult struct {
+	TrackingDifference []RankedEtf `json:"tracking_difference"`
+	ExpenseRatio       []RankedEtf `json:"total_expense_ratio"`
+	FundSize           []RankedEtf `json:"fund_size"`
+}
