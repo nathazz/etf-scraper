@@ -47,6 +47,11 @@ func CompareEtf(c *gin.Context) {
 		return
 	}
 
+	if len(req.Isins) < 2 {
+		utils.RespondError(c, http.StatusBadRequest, "For comparison it is necessary to have at least two 'isins'")
+		return
+	}
+
 	if !utils.ValidateIsins(c, req.Isins) {
 		return
 	}

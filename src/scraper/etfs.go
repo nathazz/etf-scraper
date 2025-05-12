@@ -65,7 +65,6 @@ func EtfScraper(isins []string) []model.EtfInfo {
 
 	c.OnScraped(func(r *colly.Response) {
 		info := r.Ctx.GetAny("etfInfo").(*model.EtfInfo)
-		log.Println("etfInfos(append):", *info)
 		etfInfos = append(etfInfos, *info)
 	})
 

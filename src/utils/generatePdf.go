@@ -41,13 +41,15 @@ func SaveToPDF(etfs []model.EtfInfo) ([]byte, error) {
 		pdf.Ln(8)
 	}
 
-	pdf.AddPage()
+	if len(etfs) > 1 {
+		pdf.AddPage()
 
-	rankingText := CompareEtf(etfs, false).(string)
+		rankingText := CompareEtf(etfs, false).(string)
 
-	pdf.SetFont("Arial", "", 12)
-	pdf.MultiCell(0, 7, rankingText, "", "", false)
-	pdf.Ln(5)
+		pdf.SetFont("Arial", "", 12)
+		pdf.MultiCell(0, 7, rankingText, "", "", false)
+		pdf.Ln(5)
+	}
 
 	var buf bytes.Buffer
 	err := pdf.Output(&buf)
