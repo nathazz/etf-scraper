@@ -24,6 +24,11 @@ func EtfPdfGenerator(c *gin.Context) {
 	}
 
 	etfs := scraper.EtfScraper(req.Isins)
+
+	if utils.ValidateEtfInfos(c, etfs) {
+		return
+	}
+
 	pdfBytes, err := utils.SaveToPDF(etfs)
 
 	if err != nil {

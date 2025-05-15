@@ -11,12 +11,28 @@ import (
 
 func CompareEtf(etfs []model.EtfInfo, isJson bool) interface{} {
 
-	var tdRank, terRank, fsRank []model.RankedEtf
+	var isins, tdRank, terRank, fsRank []model.RankedEtf
 
 	for _, etf := range etfs {
-		tdRank = append(tdRank, model.RankedEtf{Title: etf.Title, Value: parsePercent(etf.TrackingDifference)})
-		terRank = append(terRank, model.RankedEtf{Title: etf.Title, Value: parsePercent(etf.TotalExpenseRatio)})
-		fsRank = append(fsRank, model.RankedEtf{Title: etf.Title, Value: parseFundSize(etf.FundSize)})
+		isins = append(isins, model.RankedEtf{
+			IsinsRanked: etf.Isin,
+		})
+
+		tdRank = append(tdRank, model.RankedEtf{
+			IsinsRanked: etf.Isin,
+			Title:       etf.Title,
+			Value:       parsePercent(etf.TrackingDifference),
+		})
+		terRank = append(terRank, model.RankedEtf{
+			IsinsRanked: etf.Isin,
+			Title:       etf.Title,
+			Value:       parsePercent(etf.TotalExpenseRatio),
+		})
+		fsRank = append(fsRank, model.RankedEtf{
+			IsinsRanked: etf.Isin,
+			Title:       etf.Title,
+			Value:       parseFundSize(etf.FundSize),
+		})
 	}
 
 	sort.Slice(tdRank, func(i, j int) bool { return tdRank[i].Value < tdRank[j].Value })

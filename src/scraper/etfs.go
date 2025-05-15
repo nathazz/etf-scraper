@@ -77,6 +77,7 @@ func EtfScraper(isins []string) []model.EtfInfo {
 		ctx.Put("etfInfo", info)
 
 		err := c.Request("GET", utils.ScrapeUrls(isin), nil, ctx, nil)
+
 		if err != nil {
 			log.Println("Failed to visit:", isin, err)
 		}

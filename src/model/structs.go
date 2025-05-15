@@ -16,8 +16,9 @@ type EtfRequest struct {
 }
 
 type RankedEtf struct {
-	Title string  `json:"title"`
-	Value float64 `json:"value"`
+	IsinsRanked string  `json:"isins"`
+	Title       string  `json:"title"`
+	Value       float64 `json:"value"`
 }
 
 type RankedResult struct {
