@@ -9,6 +9,7 @@ This API provides endpoints to:
 - Compare multiple ETFs
 
 ---
+#### Base URL: `https://etf-scraper.up.railway.app/`
 
 ##  Endpoints:
 
