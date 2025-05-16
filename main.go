@@ -10,20 +10,23 @@ import (
 )
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
+
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file")
+		log.Println("error loading .env file")
 	}
 
 	port := os.Getenv("PORT")
-
 	if port == "" {
 		port = "3000"
 	}
 
 	r := gin.Default()
-	r.Use(middleware.RateLimitByIP())
 
+	_ = r.SetTrustedProxies(nil)
+
+	r.Use(middleware.RateLimitByIP())
 	routes.SetupRouter(r)
 
 	err = r.Run(":" + port)
